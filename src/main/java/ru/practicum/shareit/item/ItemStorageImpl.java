@@ -4,6 +4,8 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoMapper;
+import ru.practicum.shareit.item.model.Item;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,45 +14,44 @@ import java.util.Map;
 @Repository
 public class ItemStorageImpl implements ItemStorage {
 
-    private final Map<Long, ItemDto> itemRepository = new HashMap<>();
+    private final Map<Long, Item> itemRepository = new HashMap<>();
     private long itemCounter = 0;
 
     @Override
-    public ItemDto createItem(Long userId, ItemDto itemDto) {
-        itemDto.setOwnerId(userId);
-        itemDto.setId(itemCounter);
-        itemRepository.put(itemCounter, itemDto);
+    public ItemDto createItem(Item item) {
+        item.setId(itemCounter);
+        itemRepository.put(itemCounter, item);
         itemCounter++;
-        return itemDto;
+        return ItemDtoMapper.toItemDto(item);
     }
 
     @Override
-    public ItemDto updateItem(Long userId, Long itemId, ItemDto newItemDto) {
+    public ItemDto updateItem(Long userId, Long itemId, Item newItem) {
         if (!itemRepository.containsKey(itemId)) {
             throw new NotFoundException("Вещи с ID = " + itemId + " не существует!");
         }
-        ItemDto itemDto = itemRepository.get(itemId);
-        if (!itemDto.getOwnerId().equals(userId)) {
+        Item item = itemRepository.get(itemId);
+        if (!item.getOwner().getId().equals(userId)) {
             throw new ValidationException("У пользователя с ID = " + userId + " нет доступа к изменению данной вещи!");
         }
 
-        if (newItemDto.getName() != null && !newItemDto.getName().equals(itemDto.getName())) {
-            itemDto.setName(newItemDto.getName());
+        if (newItem.getName() != null && !newItem.getName().equals(item.getName())) {
+            item.setName(newItem.getName());
         }
 
-        if (newItemDto.getDescription() != null && !newItemDto.getDescription().equals(itemDto.getDescription())) {
-            itemDto.setDescription(newItemDto.getDescription());
+        if (newItem.getDescription() != null && !newItem.getDescription().equals(item.getDescription())) {
+            item.setDescription(newItem.getDescription());
         }
 
-        if (newItemDto.getAvailable() != itemDto.getAvailable()) {
-            itemDto.setAvailable(newItemDto.getAvailable());
+        if (newItem.getAvailable() != item.getAvailable()) {
+            item.setAvailable(newItem.getAvailable());
         }
 
-        return itemDto;
+        return ItemDtoMapper.toItemDto(item);
     }
 
     @Override
-    public ItemDto getItemById(Long itemId) {
+    public Item getItemById(Long itemId) {
         if (!itemRepository.containsKey(itemId)) {
             throw new NotFoundException("Вещи с ID = " + itemId + " не существует!");
         }
@@ -58,14 +59,14 @@ public class ItemStorageImpl implements ItemStorage {
     }
 
     @Override
-    public List<ItemDto> getAllUserItems(Long userId) {
+    public List<Item> getAllUserItems(Long userId) {
         return itemRepository.values().stream()
-                .filter(itemDto -> itemDto.getOwnerId().equals(userId))
+                .filter(itemDto -> itemDto.getOwner().getId().equals(userId))
                 .toList();
     }
 
     @Override
-    public List<ItemDto> searchItem(String text) {
+    public List<Item> searchItem(String text) {
         String lowerText = text.toLowerCase();
         return itemRepository.values().stream()
                 .filter(itemDto -> (itemDto.getName().toLowerCase().contains(lowerText) ||

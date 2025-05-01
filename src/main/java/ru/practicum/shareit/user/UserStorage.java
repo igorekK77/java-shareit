@@ -5,9 +5,9 @@ import ru.practicum.shareit.user.dto.UserDto;
 import java.util.List;
 
 public interface UserStorage {
-    List<UserDto> allUsers();
+    List<User> allUsers();
 
-    UserDto getUserById(Long userId);
+    User getUserById(Long userId);
 
     UserDto createUser(User user);
 

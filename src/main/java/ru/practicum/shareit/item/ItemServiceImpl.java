@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.item.dto.ItemDtoMapper;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.UserStorage;
 
 import java.util.List;
 
@@ -12,11 +14,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
-    private final UserService userService;
+    private final UserStorage userStorage;
 
     @Override
     public ItemDto createItem(Long userId, ItemDto itemDto) {
-        userService.getUserById(userId);
         if (itemDto.getName().isEmpty()) {
             throw new ValidationException("Имя должно быть указано!");
         }
@@ -26,28 +27,31 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() == null) {
             throw new ValidationException("Статус должен быть указан!");
         }
-        return itemStorage.createItem(userId, itemDto);
+        Item item = ItemDtoMapper.toItem(itemDto);
+        item.setOwner(userStorage.getUserById(userId));
+        return itemStorage.createItem(item);
     }
 
     @Override
     public ItemDto updateItem(Long userId, Long itemId, ItemDto newItemDto) {
-        userService.getUserById(userId);
-        return itemStorage.updateItem(userId, itemId, newItemDto);
+        Item newItem = ItemDtoMapper.toItem(newItemDto);
+        newItem.setOwner(userStorage.getUserById(userId));
+        return itemStorage.updateItem(userId, itemId, newItem);
     }
 
     @Override
     public ItemDto getItemById(Long itemId) {
-        return itemStorage.getItemById(itemId);
+        return ItemDtoMapper.toItemDto(itemStorage.getItemById(itemId));
     }
 
     @Override
     public List<ItemDto> getAllUserItems(Long userId) {
-        userService.getUserById(userId);
-        return itemStorage.getAllUserItems(userId);
+        userStorage.getUserById(userId);
+        return itemStorage.getAllUserItems(userId).stream().map(ItemDtoMapper::toItemDto).toList();
     }
 
     @Override
     public List<ItemDto> searchItem(String text) {
-        return itemStorage.searchItem(text);
+        return itemStorage.searchItem(text).stream().map(ItemDtoMapper::toItemDto).toList();
     }
 }

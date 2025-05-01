@@ -1,44 +1,41 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserDtoMapper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class UserStorageImpl implements UserStorage {
 
     private final Map<Long, User> userRepository = new HashMap<>();
+    private final Set<String> usedEmail = new HashSet<>();
     private long userCounter = 0;
 
     @Override
-    public List<UserDto> allUsers() {
-        return new ArrayList<>(userRepository.values().stream().map(UserDtoMapper::toUserDto).toList());
+    public List<User> allUsers() {
+        return new ArrayList<>(userRepository.values());
     }
 
     @Override
-    public UserDto getUserById(Long userId) {
+    public User getUserById(Long userId) {
         if (!userRepository.containsKey(userId)) {
             throw new NotFoundException("Пользователя с ID = " + userId + " не существует!");
         }
-        return UserDtoMapper.toUserDto(userRepository.get(userId));
+        return userRepository.get(userId);
     }
 
     @Override
     public UserDto createUser(User user) {
-        userRepository.values().forEach(user1 -> {
-            if (user1.getEmail().equals(user.getEmail())) {
-                throw new ValidationException("Email уже используется!");
-            }
-        });
+        if (usedEmail.contains(user.getEmail())) {
+            throw new ConflictException("Email уже используется!");
+        }
         user.setId(userCounter);
         userRepository.put(userCounter, user);
+        usedEmail.add(user.getEmail());
         userCounter++;
         return UserDtoMapper.toUserDto(user);
     }
@@ -55,11 +52,9 @@ public class UserStorageImpl implements UserStorage {
         }
 
         if (newUser.getEmail() != null && !newUser.getEmail().equals(user.getEmail())) {
-            userRepository.values().forEach(user1 -> {
-                if (user1.getEmail().equals(newUser.getEmail())) {
-                    throw new ValidationException("Email уже используется!");
-                }
-            });
+            if (usedEmail.contains(newUser.getEmail())) {
+                throw new ConflictException("Email уже используется!");
+            }
             user.setEmail(newUser.getEmail());
         }
 

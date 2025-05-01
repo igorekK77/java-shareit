@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
-
+import ru.practicum.shareit.user.dto.UserDtoMapper;
 import java.util.List;
 
 @Service
@@ -13,26 +13,26 @@ public class UserService {
     private final UserStorage userStorage;
 
     public List<UserDto> allUsers() {
-        return userStorage.allUsers();
+        return userStorage.allUsers().stream().map(UserDtoMapper::toUserDto).toList();
     }
 
     public UserDto getUserById(Long userId) {
-        return userStorage.getUserById(userId);
+        return UserDtoMapper.toUserDto(userStorage.getUserById(userId));
     }
 
-    public UserDto createUser(User user) {
-        if (user.getEmail() == null) {
+    public UserDto createUser(UserDto userDto) {
+        if (userDto.getEmail() == null) {
             throw new ValidationException("Email должен быть указан!");
         }
-        if (!user.getEmail().contains("@")) {
+        if (!userDto.getEmail().contains("@")) {
             throw new ValidationException("Email указан в неправильном формате!");
         }
 
-        return userStorage.createUser(user);
+        return userStorage.createUser(UserDtoMapper.toUser(userDto));
     }
 
-    public UserDto updateUser(Long userId, User newUser) {
-        return userStorage.updateUser(userId, newUser);
+    public UserDto updateUser(Long userId, UserDto newUserDto) {
+        return userStorage.updateUser(userId, UserDtoMapper.toUser(newUserDto));
     }
 
     public void deleteUser(Long userId) {
