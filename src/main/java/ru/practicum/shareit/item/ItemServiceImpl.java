@@ -29,14 +29,14 @@ public class ItemServiceImpl implements ItemService {
         }
         Item item = ItemDtoMapper.toItem(itemDto);
         item.setOwner(userStorage.getUserById(userId));
-        return itemStorage.createItem(item);
+        return ItemDtoMapper.toItemDto(itemStorage.createItem(item));
     }
 
     @Override
     public ItemDto updateItem(Long userId, Long itemId, ItemDto newItemDto) {
         Item newItem = ItemDtoMapper.toItem(newItemDto);
         newItem.setOwner(userStorage.getUserById(userId));
-        return itemStorage.updateItem(userId, itemId, newItem);
+        return ItemDtoMapper.toItemDto(itemStorage.updateItem(userId, itemId, newItem));
     }
 
     @Override

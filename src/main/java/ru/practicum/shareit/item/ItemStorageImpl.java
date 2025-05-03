@@ -3,8 +3,6 @@ package ru.practicum.shareit.item;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoMapper;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.HashMap;
@@ -18,15 +16,15 @@ public class ItemStorageImpl implements ItemStorage {
     private long itemCounter = 0;
 
     @Override
-    public ItemDto createItem(Item item) {
+    public Item createItem(Item item) {
         item.setId(itemCounter);
         itemRepository.put(itemCounter, item);
         itemCounter++;
-        return ItemDtoMapper.toItemDto(item);
+        return item;
     }
 
     @Override
-    public ItemDto updateItem(Long userId, Long itemId, Item newItem) {
+    public Item updateItem(Long userId, Long itemId, Item newItem) {
         if (!itemRepository.containsKey(itemId)) {
             throw new NotFoundException("Вещи с ID = " + itemId + " не существует!");
         }
@@ -47,7 +45,7 @@ public class ItemStorageImpl implements ItemStorage {
             item.setAvailable(newItem.getAvailable());
         }
 
-        return ItemDtoMapper.toItemDto(item);
+        return item;
     }
 
     @Override

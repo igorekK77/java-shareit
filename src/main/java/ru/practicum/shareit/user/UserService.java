@@ -28,11 +28,11 @@ public class UserService {
             throw new ValidationException("Email указан в неправильном формате!");
         }
 
-        return userStorage.createUser(UserDtoMapper.toUser(userDto));
+        return UserDtoMapper.toUserDto(userStorage.createUser(UserDtoMapper.toUser(userDto)));
     }
 
     public UserDto updateUser(Long userId, UserDto newUserDto) {
-        return userStorage.updateUser(userId, UserDtoMapper.toUser(newUserDto));
+        return UserDtoMapper.toUserDto(userStorage.updateUser(userId, UserDtoMapper.toUser(newUserDto)));
     }
 
     public void deleteUser(Long userId) {

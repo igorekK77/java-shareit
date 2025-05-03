@@ -3,8 +3,6 @@ package ru.practicum.shareit.user;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.ConflictException;
 import ru.practicum.shareit.exceptions.NotFoundException;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserDtoMapper;
 
 import java.util.*;
 
@@ -29,7 +27,7 @@ public class UserStorageImpl implements UserStorage {
     }
 
     @Override
-    public UserDto createUser(User user) {
+    public User createUser(User user) {
         if (usedEmail.contains(user.getEmail())) {
             throw new ConflictException("Email уже используется!");
         }
@@ -37,11 +35,11 @@ public class UserStorageImpl implements UserStorage {
         userRepository.put(userCounter, user);
         usedEmail.add(user.getEmail());
         userCounter++;
-        return UserDtoMapper.toUserDto(user);
+        return user;
     }
 
     @Override
-    public UserDto updateUser(Long userId, User newUser) {
+    public User updateUser(Long userId, User newUser) {
         if (!userRepository.containsKey(userId)) {
             throw new NotFoundException("Пользователя с ID = " + newUser.getId() + " не существует!");
         }
@@ -58,7 +56,7 @@ public class UserStorageImpl implements UserStorage {
             user.setEmail(newUser.getEmail());
         }
 
-        return UserDtoMapper.toUserDto(user);
+        return user;
     }
 
     @Override
