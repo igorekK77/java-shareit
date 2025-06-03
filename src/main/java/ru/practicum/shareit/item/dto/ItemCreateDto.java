@@ -1,21 +1,31 @@
 package ru.practicum.shareit.item.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
-public class ItemDtoMapper {
-    public static ItemDto toItemDto(Item item) {
-        ItemDto itemDto = new ItemDto();
-        itemDto.setId(item.getId());
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ItemCreateDto {
+    private String name;
+
+    private String description;
+
+    private Boolean available;
+
+    public static ItemCreateDto toItemCreateDto(Item item) {
+        ItemCreateDto itemDto = new ItemCreateDto();
         itemDto.setName(item.getName());
         itemDto.setDescription(item.getDescription());
         itemDto.setAvailable(item.getAvailable());
-        itemDto.setUserId(item.getOwner().getId());
         return itemDto;
     }
 
-    public static Item toItem(ItemDto itemDto) {
+    public static Item toItem(ItemCreateDto itemDto) {
         Item item = new Item();
-        item.setId(itemDto.getId());
         item.setName(itemDto.getName());
         item.setDescription(itemDto.getDescription());
         item.setAvailable(itemDto.getAvailable());

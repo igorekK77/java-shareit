@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.user.User;
 
 
 @Data
@@ -15,5 +16,5 @@ public class ItemDto {
 
     private Boolean available;
 
-    private Long ownerId;
+    private Long userId;
 }
