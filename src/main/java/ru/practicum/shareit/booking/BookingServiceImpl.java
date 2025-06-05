@@ -111,16 +111,17 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getOwnerItemsBooking(Long userId, BookingSortStatus bookingSortStatus) {
         getUserById(userId);
         if (bookingSortStatus == BookingSortStatus.ALL) {
-            return bookingStorage.findAllByItemOwnerIdOrderByStartDesc(userId).stream().map(BookingDtoMapper::toBookingDto).toList();
+            return bookingStorage.findAllByItemOwnerIdOrderByStartDesc(userId).stream()
+                    .map(BookingDtoMapper::toBookingDto).toList();
         } 
         BookingStatus status = getBookingStatusByParam(bookingSortStatus);
         List<BookingDto> totalListBooking;
         if (bookingSortStatus == BookingSortStatus.PAST) {
-            totalListBooking = bookingStorage.findFilterOwnerItemBookingPast(userId, status, LocalDateTime.now()).stream()
-                    .map(BookingDtoMapper::toBookingDto).toList();
+            totalListBooking = bookingStorage.findFilterOwnerItemBookingPast(userId, status,
+                            LocalDateTime.now()).stream().map(BookingDtoMapper::toBookingDto).toList();
         } else if (bookingSortStatus == BookingSortStatus.FUTURE) {
-            totalListBooking = bookingStorage.findFilterOwnerItemBookingFuture(userId, status, LocalDateTime.now()).stream()
-                    .map(BookingDtoMapper::toBookingDto).toList();
+            totalListBooking = bookingStorage.findFilterOwnerItemBookingFuture(userId, status,
+                            LocalDateTime.now()).stream().map(BookingDtoMapper::toBookingDto).toList();
         }
         totalListBooking = bookingStorage.findAllByItemOwnerIdAndStatusOrderByStartDesc(userId,
                         status).stream()
