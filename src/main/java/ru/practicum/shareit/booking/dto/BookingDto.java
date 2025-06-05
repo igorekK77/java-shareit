@@ -3,8 +3,9 @@ package ru.practicum.shareit.booking.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.dto.UserDto;
 
 import java.time.LocalDateTime;
 
@@ -18,14 +19,9 @@ public class BookingDto {
 
     private LocalDateTime end;
 
-    private Long itemId;
+    private ItemDto item;
 
-    private Long userId;
+    private UserDto booker;
 
     private BookingStatus status;
-
-    public static BookingDto toBookingDto(Booking booking) {
-        return new BookingDto(booking.getId(), booking.getStart(), booking.getEnd(), booking.getItem().getId(),
-                booking.getBooker().getId(), booking.getStatus());
-    }
 }

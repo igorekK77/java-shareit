@@ -16,36 +16,45 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public Booking createBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public BookingDto createBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
                                  @RequestBody BookingCreateDto booking) {
         return bookingService.createBooking(userId, booking);
     }
 
     @PatchMapping("/{bookingId}")
-    public Booking approvedBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public BookingDto approvedBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
                                       @PathVariable Long bookingId, @RequestParam("approved") boolean isApproved) {
         return bookingService.approvedBooking(userId, bookingId, isApproved);
     }
 
     @GetMapping("/{bookingId}")
-    public Booking getBookingInformation(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public BookingDto getBookingInformation(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @PathVariable Long bookingId) {
         return bookingService.getBookingInformation(userId, bookingId);
     }
 
     @GetMapping
-    public List<Booking> getUserBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
+    public List<BookingDto> getUserBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @RequestParam(defaultValue = "ALL") String sort) {
-        return bookingService.getUserBookings(userId, sort);
+        BookingSortStatus sortStatus;
+        try {
+            sortStatus = BookingSortStatus.valueOf(sort);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Статуса " + sort + " не существует!");
+        }
+        return bookingService.getUserBookings(userId, sortStatus);
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getOwnerItemsBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
                                               @RequestParam(defaultValue = "ALL") String sort) {
-        List<BookingDto> ownerBooking = bookingService.getOwnerItemsBooking(userId, sort);
-        if (ownerBooking.isEmpty()) {
-            throw new ValidationException("У пользователя нет вещей для бронирования!");
+        BookingSortStatus sortStatus;
+        try {
+            sortStatus = BookingSortStatus.valueOf(sort);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException("Статуса " + sort + " не существует!");
         }
-        return ownerBooking;
+        return bookingService.getOwnerItemsBooking(userId, sortStatus);
+
     }
 }

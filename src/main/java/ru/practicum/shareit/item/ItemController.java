@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.*;
 
 import java.util.List;
@@ -44,6 +45,9 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
                                     @PathVariable Long itemId, @RequestBody TextCommentDto text) {
+        if (text.getText().isBlank()) {
+            throw new ValidationException("Комментарий не должен быть путсым!");
+        }
         return itemService.createComment(userId, itemId, text.getText());
     }
 }

@@ -21,11 +21,11 @@ public class Item {
 
     private Boolean available;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User owner;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "request_id")
     private ItemRequest itemRequest;
 

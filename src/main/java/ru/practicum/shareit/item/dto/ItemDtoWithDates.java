@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.Comment;
-import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
@@ -33,16 +32,4 @@ public class ItemDtoWithDates {
     private LocalDateTime endNextBooking;
 
     private List<Comment> comments;
-
-
-    public static ItemDtoWithDates toItemDtoWithDates(Item item) {
-        ItemDtoWithDates itemDtoWithDates = new ItemDtoWithDates();
-        itemDtoWithDates.setId(item.getId());
-        itemDtoWithDates.setName(item.getName());
-        itemDtoWithDates.setDescription(item.getDescription());
-        itemDtoWithDates.setAvailable(item.getAvailable());
-        itemDtoWithDates.setOwner(item.getOwner());
-
-        return itemDtoWithDates;
-    }
 }

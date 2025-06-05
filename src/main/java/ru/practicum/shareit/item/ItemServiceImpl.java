@@ -36,7 +36,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() == null) {
             throw new ValidationException("Статус должен быть указан!");
         }
-        Item item = ItemCreateDto.toItem(itemDto);
+        Item item = ItemCreateDtoMapper.toItem(itemDto);
         item.setOwner(userStorage.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с ID = " + userId + " не найден!")));
         return ItemDtoMapper.toItemDto(itemStorage.save(item));
@@ -69,7 +69,7 @@ public class ItemServiceImpl implements ItemService {
                 new NotFoundException("Пользователь с ID = " + userId + " не найден!"));
         Item item = itemStorage.findById(itemId).orElseThrow(() ->
                 new NotFoundException("Вещь с ID = " + itemId + " не найдена!"));
-        ItemDtoWithDates itemDtoWithDates = ItemDtoWithDates.toItemDtoWithDates(item);
+        ItemDtoWithDates itemDtoWithDates = ItemDtoWithDatesMapper.toItemDtoWithDates(item);
         List<Comment> itemComments = commentRepository.findAllByItemId(itemId);
         itemDtoWithDates.setComments(itemComments);
         return itemDtoWithDates;
@@ -79,45 +79,32 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDtoWithDates> getAllUserItems(Long userId) {
         userStorage.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с ID = " + userId + " не найден!"));
-        List<Booking> ownerListBooking = bookingStorage.findAllByItemOwnerId(userId);
+        List<Booking> ownerListBooking = bookingStorage.findAllByItemOwnerIdOrderByStartDesc(userId);
         if (ownerListBooking.isEmpty()) {
-            return itemStorage.findAllByOwnerId(userId).stream().map(ItemDtoWithDates::toItemDtoWithDates)
+            return itemStorage.findAllByOwnerId(userId).stream().map(ItemDtoWithDatesMapper::toItemDtoWithDates)
                     .collect(Collectors.toList());
         }
-        Map<Long, ItemDtoWithDates> sortedItems = new HashMap<>();
-        for (Booking booking: ownerListBooking) {
-            if (!sortedItems.containsKey(booking.getItem().getId())) {
-                ItemDtoWithDates itemDtoWithDates = ItemDtoWithDates.toItemDtoWithDates(booking.getItem());
-                itemDtoWithDates.setLastBooking(booking.getStart());
-                itemDtoWithDates.setEndLastBooking(booking.getEnd());
-                sortedItems.put(booking.getItem().getId(), itemDtoWithDates);
+        List<ItemDtoWithDates> totalItemWithDates = new ArrayList<>();
+        for (int i = 0; i < ownerListBooking.size(); i++) {
+            ItemDtoWithDates itemDtoWithDates = ItemDtoWithDatesMapper.toItemDtoWithDates(ownerListBooking.get(i)
+                    .getItem());
+            if (i == 0) {
+                itemDtoWithDates.setLastBooking(ownerListBooking.get(i+1).getStart());
+                itemDtoWithDates.setEndLastBooking(ownerListBooking.get(i+1).getEnd());
+                totalItemWithDates.add(itemDtoWithDates);
+            } else if (i == ownerListBooking.size() - 1) {
+                itemDtoWithDates.setNextBooking(ownerListBooking.get(i-1).getStart());
+                itemDtoWithDates.setEndNextBooking(ownerListBooking.get(i-1).getEnd());
+                totalItemWithDates.add(itemDtoWithDates);
             } else {
-                ItemDtoWithDates itemDtoWithDates = sortedItems.get(booking.getItem().getId());
-                if (itemDtoWithDates.getLastBooking().isAfter(booking.getStart()) &&
-                        itemDtoWithDates.getNextBooking() == null) {
-                    itemDtoWithDates.setNextBooking(itemDtoWithDates.getLastBooking());
-                    itemDtoWithDates.setEndNextBooking(itemDtoWithDates.getEndLastBooking());
-                    itemDtoWithDates.setLastBooking(booking.getStart());
-                    itemDtoWithDates.setEndLastBooking(booking.getEnd());
-                } else if (itemDtoWithDates.getLastBooking().isBefore(booking.getStart()) &&
-                        itemDtoWithDates.getNextBooking() == null) {
-                    itemDtoWithDates.setNextBooking(booking.getStart());
-                    itemDtoWithDates.setEndNextBooking(booking.getEnd());
-                } else if (itemDtoWithDates.getLastBooking().isBefore(booking.getStart())) {
-                    if (itemDtoWithDates.getNextBooking().isBefore(booking.getStart())) {
-                        itemDtoWithDates.setLastBooking(itemDtoWithDates.getNextBooking());
-                        itemDtoWithDates.setEndLastBooking(itemDtoWithDates.getEndNextBooking());
-                        itemDtoWithDates.setNextBooking(booking.getStart());
-                        itemDtoWithDates.setEndNextBooking(booking.getEnd());
-                    } else if (itemDtoWithDates.getNextBooking().isAfter(booking.getStart())) {
-                        itemDtoWithDates.setLastBooking(booking.getStart());
-                        itemDtoWithDates.setEndLastBooking(booking.getEnd());
-                    }
-                }
-                sortedItems.put(booking.getItem().getId(), itemDtoWithDates);
+                itemDtoWithDates.setLastBooking(ownerListBooking.get(i+1).getStart());
+                itemDtoWithDates.setEndLastBooking(ownerListBooking.get(i+1).getEnd());
+                itemDtoWithDates.setNextBooking(ownerListBooking.get(i-1).getStart());
+                itemDtoWithDates.setEndNextBooking(ownerListBooking.get(i-1).getEnd());
+                totalItemWithDates.add(itemDtoWithDates);
             }
         }
-        List<ItemDtoWithDates> totalItemWithDates = sortedItems.values().stream().toList();
+
         List<Comment> allCommentsForOwner = commentRepository.findAllByItemOwnerId(userId);
         Map<Long, List<Comment>> commentsWithIdItem = new HashMap<>();
         for (Comment comment: allCommentsForOwner) {
@@ -170,11 +157,8 @@ public class ItemServiceImpl implements ItemService {
                     "ID = " + itemId);
         }
 
-        Comment comment = new Comment();
-        comment.setText(text);
-        comment.setCreated(LocalDateTime.now());
-        comment.setUser(user);
-        comment.setItem(item);
-        return CommentDto.toCommentDto(commentRepository.save(comment));
+        Comment comment = CreateCommentMapper.createComment(text, user, item);
+
+        return CommentDtoMapper.toCommentDto(commentRepository.save(comment));
     }
 }
