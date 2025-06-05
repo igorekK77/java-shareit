@@ -113,7 +113,7 @@ public class BookingServiceImpl implements BookingService {
         if (bookingSortStatus == BookingSortStatus.ALL) {
             return bookingStorage.findAllByItemOwnerIdOrderByStartDesc(userId).stream()
                     .map(BookingDtoMapper::toBookingDto).toList();
-        } 
+        }
         BookingStatus status = getBookingStatusByParam(bookingSortStatus);
         List<BookingDto> totalListBooking;
         if (bookingSortStatus == BookingSortStatus.PAST) {
