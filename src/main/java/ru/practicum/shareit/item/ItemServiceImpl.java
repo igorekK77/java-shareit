@@ -89,18 +89,18 @@ public class ItemServiceImpl implements ItemService {
             ItemDtoWithDates itemDtoWithDates = ItemDtoWithDatesMapper.toItemDtoWithDates(ownerListBooking.get(i)
                     .getItem());
             if (i == 0) {
-                itemDtoWithDates.setLastBooking(ownerListBooking.get(i+1).getStart());
-                itemDtoWithDates.setEndLastBooking(ownerListBooking.get(i+1).getEnd());
+                itemDtoWithDates.setLastBooking(ownerListBooking.get(i + 1).getStart());
+                itemDtoWithDates.setEndLastBooking(ownerListBooking.get(i + 1).getEnd());
                 totalItemWithDates.add(itemDtoWithDates);
             } else if (i == ownerListBooking.size() - 1) {
-                itemDtoWithDates.setNextBooking(ownerListBooking.get(i-1).getStart());
-                itemDtoWithDates.setEndNextBooking(ownerListBooking.get(i-1).getEnd());
+                itemDtoWithDates.setNextBooking(ownerListBooking.get(i - 1).getStart());
+                itemDtoWithDates.setEndNextBooking(ownerListBooking.get(i - 1).getEnd());
                 totalItemWithDates.add(itemDtoWithDates);
             } else {
-                itemDtoWithDates.setLastBooking(ownerListBooking.get(i+1).getStart());
-                itemDtoWithDates.setEndLastBooking(ownerListBooking.get(i+1).getEnd());
-                itemDtoWithDates.setNextBooking(ownerListBooking.get(i-1).getStart());
-                itemDtoWithDates.setEndNextBooking(ownerListBooking.get(i-1).getEnd());
+                itemDtoWithDates.setLastBooking(ownerListBooking.get(i + 1).getStart());
+                itemDtoWithDates.setEndLastBooking(ownerListBooking.get(i + 1).getEnd());
+                itemDtoWithDates.setNextBooking(ownerListBooking.get(i - 1).getStart());
+                itemDtoWithDates.setEndNextBooking(ownerListBooking.get(i - 1).getEnd());
                 totalItemWithDates.add(itemDtoWithDates);
             }
         }
