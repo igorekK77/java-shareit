@@ -6,7 +6,12 @@ import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 
-public class CreateCommentMapper {
+public class CommentMapper {
+    public static CommentDto toCommentDto(Comment comment) {
+        return new CommentDto(comment.getId(), comment.getText(), comment.getItem(), comment.getUser().getName(),
+                comment.getCreated());
+    }
+
     public static Comment createComment(String text, User user, Item item) {
         Comment comment = new Comment();
         comment.setText(text);

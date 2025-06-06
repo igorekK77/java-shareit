@@ -11,10 +11,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,10 +33,10 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() == null) {
             throw new ValidationException("Статус должен быть указан!");
         }
-        Item item = ItemCreateDtoMapper.toItem(itemDto);
+        Item item = ItemMapper.toItemFromItemCreateDto(itemDto);
         item.setOwner(userStorage.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с ID = " + userId + " не найден!")));
-        return ItemDtoMapper.toItemDto(itemStorage.save(item));
+        return ItemMapper.toItemDto(itemStorage.save(item));
     }
 
     @Override
@@ -57,10 +54,10 @@ public class ItemServiceImpl implements ItemService {
         if (newItemDto.getAvailable() == null) {
             newItemDto.setAvailable(item.getAvailable());
         }
-        Item newItem = ItemDtoMapper.toItem(newItemDto);
+        Item newItem = ItemMapper.toItemFromItemDto(newItemDto);
         newItem.setId(itemId);
         newItem.setOwner(user);
-        return ItemDtoMapper.toItemDto(itemStorage.save(newItem));
+        return ItemMapper.toItemDto(itemStorage.save(newItem));
     }
 
     @Override
@@ -69,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
                 new NotFoundException("Пользователь с ID = " + userId + " не найден!"));
         Item item = itemStorage.findById(itemId).orElseThrow(() ->
                 new NotFoundException("Вещь с ID = " + itemId + " не найдена!"));
-        ItemDtoWithDates itemDtoWithDates = ItemDtoWithDatesMapper.toItemDtoWithDates(item);
+        ItemDtoWithDates itemDtoWithDates = ItemMapper.toItemDtoWithDates(item);
         List<Comment> itemComments = commentRepository.findAllByItemId(itemId);
         itemDtoWithDates.setComments(itemComments);
         return itemDtoWithDates;
@@ -81,28 +78,37 @@ public class ItemServiceImpl implements ItemService {
                 new NotFoundException("Пользователь с ID = " + userId + " не найден!"));
         List<Booking> ownerListBooking = bookingStorage.findAllByItemOwnerIdOrderByStartDesc(userId);
         if (ownerListBooking.isEmpty()) {
-            return itemStorage.findAllByOwnerId(userId).stream().map(ItemDtoWithDatesMapper::toItemDtoWithDates)
+            return itemStorage.findAllByOwnerId(userId).stream().map(ItemMapper::toItemDtoWithDates)
                     .collect(Collectors.toList());
         }
         List<ItemDtoWithDates> totalItemWithDates = new ArrayList<>();
+        List<Long> usesItemId = new ArrayList<>();
         for (int i = 0; i < ownerListBooking.size(); i++) {
-            ItemDtoWithDates itemDtoWithDates = ItemDtoWithDatesMapper.toItemDtoWithDates(ownerListBooking.get(i)
+            ItemDtoWithDates itemDtoWithDates = ItemMapper.toItemDtoWithDates(ownerListBooking.get(i)
                     .getItem());
-            if (i == 0) {
-                itemDtoWithDates.setLastBooking(ownerListBooking.get(i + 1).getStart());
-                itemDtoWithDates.setEndLastBooking(ownerListBooking.get(i + 1).getEnd());
-                totalItemWithDates.add(itemDtoWithDates);
-            } else if (i == ownerListBooking.size() - 1) {
-                itemDtoWithDates.setNextBooking(ownerListBooking.get(i - 1).getStart());
-                itemDtoWithDates.setEndNextBooking(ownerListBooking.get(i - 1).getEnd());
-                totalItemWithDates.add(itemDtoWithDates);
-            } else {
-                itemDtoWithDates.setLastBooking(ownerListBooking.get(i + 1).getStart());
-                itemDtoWithDates.setEndLastBooking(ownerListBooking.get(i + 1).getEnd());
-                itemDtoWithDates.setNextBooking(ownerListBooking.get(i - 1).getStart());
-                itemDtoWithDates.setEndNextBooking(ownerListBooking.get(i - 1).getEnd());
-                totalItemWithDates.add(itemDtoWithDates);
+            if (usesItemId.contains(itemDtoWithDates.getId())) {
+                continue;
             }
+            Booking lastBooking = ownerListBooking.stream()
+                    .filter(b -> b.getItem().getId().equals(itemDtoWithDates.getId()))
+                    .filter(b -> b.getEnd().isBefore(LocalDateTime.now()))
+                    .max(Comparator.comparing(Booking::getEnd))
+                    .orElse(null);
+            Booking nextBooking = ownerListBooking.stream()
+                    .filter(b -> b.getItem().getId().equals(itemDtoWithDates.getId()))
+                    .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
+                    .min(Comparator.comparing(Booking::getStart))
+                    .orElse(null);
+            if (lastBooking != null) {
+                itemDtoWithDates.setLastBooking(lastBooking.getStart());
+                itemDtoWithDates.setEndLastBooking(lastBooking.getEnd());
+            }
+            if (nextBooking != null) {
+                itemDtoWithDates.setNextBooking(nextBooking.getStart());
+                itemDtoWithDates.setEndNextBooking(nextBooking.getEnd());
+            }
+            totalItemWithDates.add(itemDtoWithDates);
+            usesItemId.add(itemDtoWithDates.getId());
         }
 
         List<Comment> allCommentsForOwner = commentRepository.findAllByItemOwnerId(userId);
@@ -130,7 +136,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> searchItem(String text) {
         return itemStorage.findAllByAvailableAndNameContainingIgnoreCaseOrAvailableAndDescriptionContainingIgnoreCase(
-                true, text, true, text).stream().map(ItemDtoMapper::toItemDto).toList();
+                true, text, true, text).stream().map(ItemMapper::toItemDto).toList();
     }
 
     @Override
@@ -157,8 +163,8 @@ public class ItemServiceImpl implements ItemService {
                     "ID = " + itemId);
         }
 
-        Comment comment = CreateCommentMapper.createComment(text, user, item);
+        Comment comment = CommentMapper.createComment(text, user, item);
 
-        return CommentDtoMapper.toCommentDto(commentRepository.save(comment));
+        return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 }

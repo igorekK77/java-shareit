@@ -7,7 +7,7 @@ import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.user.dto.CreateUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserDtoMapper;
+import ru.practicum.shareit.user.dto.UserMapper;
 import java.util.List;
 
 @Service
@@ -16,11 +16,11 @@ public class UserService {
     private final UserStorage userStorage;
 
     public List<UserDto> allUsers() {
-        return userStorage.findAll().stream().map(UserDtoMapper::toUserDto).toList();
+        return userStorage.findAll().stream().map(UserMapper::toUserDto).toList();
     }
 
     public UserDto getUserById(Long userId) {
-        return UserDtoMapper.toUserDto(userStorage.findById(userId).orElseThrow(() ->
+        return UserMapper.toUserDto(userStorage.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с ID = " + userId + " не найден!")));
     }
 
@@ -37,7 +37,7 @@ public class UserService {
             throw new ConflictException("Пользователь с таким Email уже существует!");
         }
 
-        return UserDtoMapper.toUserDto(userStorage.save(CreateUserDto.toUser(userDto)));
+        return UserMapper.toUserDto(userStorage.save(CreateUserDto.toUser(userDto)));
     }
 
     public UserDto updateUser(Long userId, UserDto newUserDto) {
@@ -55,9 +55,9 @@ public class UserService {
         if (newUserDto.getName() == null) {
             newUserDto.setName(user.getName());
         }
-        User updateUser = UserDtoMapper.toUser(newUserDto);
+        User updateUser = UserMapper.toUser(newUserDto);
         updateUser.setId(userId);
-        return UserDtoMapper.toUserDto(userStorage.save(updateUser));
+        return UserMapper.toUserDto(userStorage.save(updateUser));
     }
 
     public void deleteUser(Long userId) {

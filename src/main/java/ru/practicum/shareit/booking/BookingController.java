@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.exceptions.ValidationException;
 
 import java.util.List;
 
@@ -36,25 +35,13 @@ public class BookingController {
     @GetMapping
     public List<BookingDto> getUserBookings(@RequestHeader("X-Sharer-User-Id") Long userId,
                                          @RequestParam(defaultValue = "ALL") String sort) {
-        BookingSortStatus sortStatus;
-        try {
-            sortStatus = BookingSortStatus.valueOf(sort);
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException("Статуса " + sort + " не существует!");
-        }
-        return bookingService.getUserBookings(userId, sortStatus);
+        return bookingService.getUserBookings(userId, BookingDto.checkExistsBookingSortStatus(sort));
     }
 
     @GetMapping("/owner")
     public List<BookingDto> getOwnerItemsBooking(@RequestHeader("X-Sharer-User-Id") Long userId,
                                               @RequestParam(defaultValue = "ALL") String sort) {
-        BookingSortStatus sortStatus;
-        try {
-            sortStatus = BookingSortStatus.valueOf(sort);
-        } catch (IllegalArgumentException e) {
-            throw new ValidationException("Статуса " + sort + " не существует!");
-        }
-        return bookingService.getOwnerItemsBooking(userId, sortStatus);
+        return bookingService.getOwnerItemsBooking(userId, BookingDto.checkExistsBookingSortStatus(sort));
 
     }
 }

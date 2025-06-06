@@ -3,9 +3,8 @@ package ru.practicum.shareit.booking;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
-import ru.practicum.shareit.booking.dto.BookingCreateDtoMapper;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.BookingDtoMapper;
+import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.ItemStorage;
@@ -38,15 +37,13 @@ public class BookingServiceImpl implements BookingService {
         for (Booking booking : allBookingItem) {
             LocalDateTime startNewBooking = bookingCreateDto.getStart();
             LocalDateTime endNewBooking = bookingCreateDto.getEnd();
-            if (startNewBooking.equals(booking.getStart()) && endNewBooking.equals(booking.getEnd()) ||
-                    endNewBooking.isAfter(booking.getStart()) && endNewBooking.isBefore(booking.getEnd()) ||
-                    startNewBooking.isAfter(booking.getStart()) && startNewBooking.isBefore(booking.getEnd())) {
+            if (!startNewBooking.isAfter(booking.getEnd()) && !endNewBooking.isBefore(booking.getStart())) {
                 throw new ValidationException("Данная вещь уже забронирована на данный период времени!");
             }
         }
 
-        Booking booking = BookingCreateDtoMapper.toBooking(bookingCreateDto, booker, item);
-        return BookingDtoMapper.toBookingDto(bookingStorage.save(booking));
+        Booking booking = BookingMapper.toBookingFromBookingCreateDto(bookingCreateDto, booker, item);
+        return BookingMapper.toBookingDto(bookingStorage.save(booking));
     }
 
     @Override
@@ -62,13 +59,11 @@ public class BookingServiceImpl implements BookingService {
                         "бронирования: " + bookingId);
             }
             booking.setStatus(BookingStatus.APPROVED);
-            bookingStorage.save(booking);
         } else {
             booking.setStatus(BookingStatus.REJECTED);
-            bookingStorage.save(booking);
         }
-
-        return BookingDtoMapper.toBookingDto(booking);
+        bookingStorage.save(booking);
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Override
@@ -80,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
         Long bookingItemId = booking.getBooker().getId();
 
         if (userId.equals(ownerItemId) || userId.equals(bookingItemId)) {
-            return BookingDtoMapper.toBookingDto(booking);
+            return BookingMapper.toBookingDto(booking);
         }
 
         throw new ValidationException("У пользователя " + userId + " нет прав на изменение " +
@@ -92,18 +87,18 @@ public class BookingServiceImpl implements BookingService {
         getUserById(userId);
         if (bookingSortStatus == BookingSortStatus.ALL) {
             return bookingStorage.findAllByBookerIdOrderByStartDesc(userId).stream()
-                    .map(BookingDtoMapper::toBookingDto).toList();
+                    .map(BookingMapper::toBookingDto).toList();
         }
         BookingStatus status = getBookingStatusByParam(bookingSortStatus);
         if (bookingSortStatus == BookingSortStatus.PAST) {
             return bookingStorage.findFilterBookerPast(userId, status, LocalDateTime.now()).stream()
-                    .map(BookingDtoMapper::toBookingDto).toList();
+                    .map(BookingMapper::toBookingDto).toList();
         } else if (bookingSortStatus == BookingSortStatus.FUTURE) {
             return bookingStorage.findFilterBookerFuture(userId, status, LocalDateTime.now()).stream()
-                    .map(BookingDtoMapper::toBookingDto).toList();
+                    .map(BookingMapper::toBookingDto).toList();
         } else {
             return bookingStorage.findAllByBookerIdAndStatusOrderByStartDesc(userId, status).stream()
-                    .map(BookingDtoMapper::toBookingDto).toList();
+                    .map(BookingMapper::toBookingDto).toList();
         }
     }
 
@@ -112,20 +107,20 @@ public class BookingServiceImpl implements BookingService {
         getUserById(userId);
         if (bookingSortStatus == BookingSortStatus.ALL) {
             return bookingStorage.findAllByItemOwnerIdOrderByStartDesc(userId).stream()
-                    .map(BookingDtoMapper::toBookingDto).toList();
+                    .map(BookingMapper::toBookingDto).toList();
         }
         BookingStatus status = getBookingStatusByParam(bookingSortStatus);
         List<BookingDto> totalListBooking;
         if (bookingSortStatus == BookingSortStatus.PAST) {
             totalListBooking = bookingStorage.findFilterOwnerItemBookingPast(userId, status,
-                            LocalDateTime.now()).stream().map(BookingDtoMapper::toBookingDto).toList();
+                            LocalDateTime.now()).stream().map(BookingMapper::toBookingDto).toList();
         } else if (bookingSortStatus == BookingSortStatus.FUTURE) {
             totalListBooking = bookingStorage.findFilterOwnerItemBookingFuture(userId, status,
-                            LocalDateTime.now()).stream().map(BookingDtoMapper::toBookingDto).toList();
+                            LocalDateTime.now()).stream().map(BookingMapper::toBookingDto).toList();
         }
         totalListBooking = bookingStorage.findAllByItemOwnerIdAndStatusOrderByStartDesc(userId,
                         status).stream()
-                .map(BookingDtoMapper::toBookingDto)
+                .map(BookingMapper::toBookingDto)
                 .toList();
         if (totalListBooking.isEmpty()) {
             throw new ValidationException("У пользователя нет вещей для бронирования!");
