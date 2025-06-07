@@ -2,7 +2,8 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.exceptions.ValidationException;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") Long userId, @RequestBody ItemDto itemDto) {
+    public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") Long userId, @RequestBody ItemCreateDto itemDto) {
         return itemService.createItem(userId, itemDto);
     }
 
@@ -24,12 +25,12 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable Long itemId) {
-        return itemService.getItemById(itemId);
+    public ItemDtoWithBookings getItemById(@RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable Long itemId) {
+        return itemService.getItemById(userId, itemId);
     }
 
     @GetMapping
-    public List<ItemDto> getAllUserItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public List<ItemDtoWithBookings> getAllUserItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         return itemService.getAllUserItems(userId);
     }
 
@@ -39,5 +40,14 @@ public class ItemController {
             return List.of();
         }
         return itemService.searchItem(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                    @PathVariable Long itemId, @RequestBody TextCommentDto text) {
+        if (text.getText().isBlank()) {
+            throw new ValidationException("Комментарий не должен быть путсым!");
+        }
+        return itemService.createComment(userId, itemId, text.getText());
     }
 }
