@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStorage;
+import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.*;
@@ -61,19 +62,19 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDtoWithDates getItemById(Long userId, Long itemId) {
+    public ItemDtoWithBookings getItemById(Long userId, Long itemId) {
         User user = userStorage.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с ID = " + userId + " не найден!"));
         Item item = itemStorage.findById(itemId).orElseThrow(() ->
                 new NotFoundException("Вещь с ID = " + itemId + " не найдена!"));
-        ItemDtoWithDates itemDtoWithDates = ItemMapper.toItemDtoWithDates(item);
+        ItemDtoWithBookings itemDtoWithBookings = ItemMapper.toItemDtoWithDates(item);
         List<Comment> itemComments = commentRepository.findAllByItemId(itemId);
-        itemDtoWithDates.setComments(itemComments);
-        return itemDtoWithDates;
+        itemDtoWithBookings.setComments(itemComments);
+        return itemDtoWithBookings;
     }
 
     @Override
-    public List<ItemDtoWithDates> getAllUserItems(Long userId) {
+    public List<ItemDtoWithBookings> getAllUserItems(Long userId) {
         userStorage.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с ID = " + userId + " не найден!"));
         List<Booking> ownerListBooking = bookingStorage.findAllByItemOwnerIdOrderByStartDesc(userId);
@@ -81,34 +82,32 @@ public class ItemServiceImpl implements ItemService {
             return itemStorage.findAllByOwnerId(userId).stream().map(ItemMapper::toItemDtoWithDates)
                     .collect(Collectors.toList());
         }
-        List<ItemDtoWithDates> totalItemWithDates = new ArrayList<>();
+        List<ItemDtoWithBookings> totalItemWithDates = new ArrayList<>();
         List<Long> usesItemId = new ArrayList<>();
         for (int i = 0; i < ownerListBooking.size(); i++) {
-            ItemDtoWithDates itemDtoWithDates = ItemMapper.toItemDtoWithDates(ownerListBooking.get(i)
+            ItemDtoWithBookings itemDtoWithBookings = ItemMapper.toItemDtoWithDates(ownerListBooking.get(i)
                     .getItem());
-            if (usesItemId.contains(itemDtoWithDates.getId())) {
+            if (usesItemId.contains(itemDtoWithBookings.getId())) {
                 continue;
             }
             Booking lastBooking = ownerListBooking.stream()
-                    .filter(b -> b.getItem().getId().equals(itemDtoWithDates.getId()))
+                    .filter(b -> b.getItem().getId().equals(itemDtoWithBookings.getId()))
                     .filter(b -> b.getEnd().isBefore(LocalDateTime.now()))
                     .max(Comparator.comparing(Booking::getEnd))
                     .orElse(null);
             Booking nextBooking = ownerListBooking.stream()
-                    .filter(b -> b.getItem().getId().equals(itemDtoWithDates.getId()))
+                    .filter(b -> b.getItem().getId().equals(itemDtoWithBookings.getId()))
                     .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
                     .min(Comparator.comparing(Booking::getStart))
                     .orElse(null);
             if (lastBooking != null) {
-                itemDtoWithDates.setLastBooking(lastBooking.getStart());
-                itemDtoWithDates.setEndLastBooking(lastBooking.getEnd());
+                itemDtoWithBookings.setLastBooking(BookingMapper.toBookingDto(lastBooking));
             }
             if (nextBooking != null) {
-                itemDtoWithDates.setNextBooking(nextBooking.getStart());
-                itemDtoWithDates.setEndNextBooking(nextBooking.getEnd());
+                itemDtoWithBookings.setNextBooking(BookingMapper.toBookingDto(nextBooking));
             }
-            totalItemWithDates.add(itemDtoWithDates);
-            usesItemId.add(itemDtoWithDates.getId());
+            totalItemWithDates.add(itemDtoWithBookings);
+            usesItemId.add(itemDtoWithBookings.getId());
         }
 
         List<Comment> allCommentsForOwner = commentRepository.findAllByItemOwnerId(userId);
@@ -124,9 +123,9 @@ public class ItemServiceImpl implements ItemService {
             }
         }
 
-        for (ItemDtoWithDates itemDtoWithDates: totalItemWithDates) {
-            if (commentsWithIdItem.containsKey(itemDtoWithDates.getId())) {
-                itemDtoWithDates.setComments(commentsWithIdItem.get(itemDtoWithDates.getId()));
+        for (ItemDtoWithBookings itemDtoWithBookings : totalItemWithDates) {
+            if (commentsWithIdItem.containsKey(itemDtoWithBookings.getId())) {
+                itemDtoWithBookings.setComments(commentsWithIdItem.get(itemDtoWithBookings.getId()));
             }
         }
 

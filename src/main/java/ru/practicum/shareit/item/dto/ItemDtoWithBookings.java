@@ -3,16 +3,15 @@ package ru.practicum.shareit.item.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.user.User;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemDtoWithDates {
+public class ItemDtoWithBookings {
     private Long id;
 
     private String name;
@@ -23,13 +22,9 @@ public class ItemDtoWithDates {
 
     private User owner;
 
-    private LocalDateTime lastBooking;
+    private BookingDto lastBooking;
 
-    private LocalDateTime endLastBooking;
-
-    private LocalDateTime nextBooking;
-
-    private LocalDateTime endNextBooking;
+    private BookingDto nextBooking;
 
     private List<Comment> comments;
 }
