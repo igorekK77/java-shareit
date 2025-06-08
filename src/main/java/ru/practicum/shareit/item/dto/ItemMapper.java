@@ -40,4 +40,8 @@ public class ItemMapper {
 
         return itemDtoWithBookings;
     }
+
+    public static ItemAnswerRequestDto toItemAnswerRequestDto(Item item) {
+        return new ItemAnswerRequestDto(item.getId(), item.getName(), item.getOwner().getId());
+    }
 }

@@ -28,5 +28,4 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "request_id")
     private ItemRequest itemRequest;
-
 }

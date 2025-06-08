@@ -9,4 +9,8 @@ public interface ItemStorage extends JpaRepository<Item, Long> {
 
     List<Item> findAllByAvailableAndNameContainingIgnoreCaseOrAvailableAndDescriptionContainingIgnoreCase(
             Boolean availableName, String text1, Boolean availableDescription, String text2);
+
+    List<Item> findAllByItemRequestIdIn(List<Long> itemRequestsIds);
+
+    List<Item> findAllByItemRequestId(Long requestId);
 }
