@@ -19,7 +19,7 @@ public class ItemRequest {
 
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User requester;
 

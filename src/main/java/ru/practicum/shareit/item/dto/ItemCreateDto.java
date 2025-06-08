@@ -13,4 +13,6 @@ public class ItemCreateDto {
     private String description;
 
     private Boolean available;
+
+    private Long requestId;
 }
