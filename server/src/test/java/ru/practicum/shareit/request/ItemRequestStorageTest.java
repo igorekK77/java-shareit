@@ -2,12 +2,9 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserStorage;
@@ -22,21 +19,15 @@ import java.util.Optional;
 public class ItemRequestStorageTest {
     private final ItemRequestStorage itemRequestStorage;
     private final UserStorage userStorage;
-    private final JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void afterEach() {
-        jdbcTemplate.execute("ALTER SEQUENCE requests_id_seq RESTART WITH 1");
-    }
 
     @Test
     void testCreateRequest() {
         User user = userStorage.save(new User(null, "testUser", "test@mail.ru"));
         LocalDateTime dateTime = LocalDateTime.now();
-        ItemRequest itemRequest = new ItemRequest(1L, "test description", user, dateTime);
         ItemRequest itemRequestWithOutId = new ItemRequest(null, "test description", user, dateTime);
         ItemRequest checkItemRequest = itemRequestStorage.save(itemRequestWithOutId);
+        ItemRequest itemRequest = new ItemRequest(checkItemRequest.getId(), "test description", user,
+                dateTime);
 
         Assertions.assertEquals(itemRequest, checkItemRequest);
     }

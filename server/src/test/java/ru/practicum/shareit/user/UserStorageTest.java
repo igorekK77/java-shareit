@@ -3,12 +3,9 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -19,13 +16,6 @@ import java.util.Optional;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserStorageTest {
     private final UserStorage userStorage;
-    private final JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void afterEach() {
-        jdbcTemplate.execute("ALTER SEQUENCE users_id_seq RESTART WITH 1");
-    }
 
     @Test
     void testGetAllUsers() {
