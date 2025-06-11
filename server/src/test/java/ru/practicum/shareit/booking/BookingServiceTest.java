@@ -116,9 +116,11 @@ public class BookingServiceTest {
         User user1 = new User(1L, "testUser", "test@mail.ru");
         Item item = new Item(1L, "test1", "testDescription1", true, new User(1L,
                 "testUser", "test@mail.ru"), null);
-        Booking booking = new Booking(1L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(1),
+        LocalDateTime startTime = LocalDateTime.now().minusDays(3);
+        LocalDateTime endTime = LocalDateTime.now().minusDays(1);
+        Booking booking = new Booking(1L, startTime, endTime,
                 item, user1, BookingStatus.WAITING);
-        Booking totalBooking = new Booking(1L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(1),
+        Booking totalBooking = new Booking(1L, startTime, endTime,
                 item, user1, BookingStatus.APPROVED);
         when(bookingStorage.findById(1L)).thenReturn(Optional.of(booking));
         when(bookingStorage.save(any(Booking.class))).thenReturn(booking);
@@ -151,9 +153,11 @@ public class BookingServiceTest {
         User user1 = new User(1L, "testUser", "test@mail.ru");
         Item item = new Item(1L, "test1", "testDescription1", true, new User(1L,
                 "testUser", "test@mail.ru"), null);
-        Booking booking = new Booking(1L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(1),
+        LocalDateTime startTime = LocalDateTime.now().minusDays(3);
+        LocalDateTime endTime = LocalDateTime.now().minusDays(1);
+        Booking booking = new Booking(1L, startTime, endTime,
                 item, user1, BookingStatus.WAITING);
-        Booking totalBooking = new Booking(1L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(1),
+        Booking totalBooking = new Booking(1L, startTime, endTime,
                 item, user1, BookingStatus.REJECTED);
         when(bookingStorage.findById(1L)).thenReturn(Optional.of(booking));
         when(bookingStorage.save(any(Booking.class))).thenReturn(booking);
