@@ -207,8 +207,8 @@ public class ItemServiceTest {
                 "testUser", "test@mail.ru"), null);
         Item item2 = new Item(2L, "test1", "testSearch1D", true, new User(2L,
                 "testUser2", "test2@mail.ru"), null);
-        when(itemStorage.
-                findAllByAvailableAndNameContainingIgnoreCaseOrAvailableAndDescriptionContainingIgnoreCase(
+        when(itemStorage
+                .findAllByAvailableAndNameContainingIgnoreCaseOrAvailableAndDescriptionContainingIgnoreCase(
                         true, "testSearch", true, "testSearch")).thenReturn(List
                 .of(item1, item2));
         Assertions.assertEquals(List.of(itemDto1, itemDto2), itemService.searchItem("testSearch"));

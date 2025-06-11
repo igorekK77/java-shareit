@@ -17,7 +17,6 @@ import ru.practicum.shareit.user.UserStorage;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

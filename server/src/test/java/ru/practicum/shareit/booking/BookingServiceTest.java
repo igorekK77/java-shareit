@@ -49,8 +49,8 @@ public class BookingServiceTest {
         Booking booking = new Booking(9L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(1),
                 item, user1, BookingStatus.CANCELED);
 
-        when(bookingStorage.findAllByItemIdAndStatus(item.getId(), BookingStatus.APPROVED)).
-                thenReturn(List.of(booking));
+        when(bookingStorage.findAllByItemIdAndStatus(item.getId(), BookingStatus.APPROVED))
+                .thenReturn(List.of(booking));
         Booking totalBooking = BookingMapper.toBookingFromBookingCreateDto(bookingCreateDto, user1, item);
         when(bookingStorage.save(any(Booking.class))).thenReturn(totalBooking);
 
@@ -104,8 +104,8 @@ public class BookingServiceTest {
         Booking booking = new Booking(9L, LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(4),
                 item, user1, BookingStatus.CANCELED);
 
-        when(bookingStorage.findAllByItemIdAndStatus(item.getId(), BookingStatus.APPROVED)).
-                thenReturn(List.of(booking));
+        when(bookingStorage.findAllByItemIdAndStatus(item.getId(), BookingStatus.APPROVED))
+                .thenReturn(List.of(booking));
 
         Assertions.assertThrows(ValidationException.class, () -> bookingService.createBooking(1L,
                 bookingCreateDto));
@@ -142,7 +142,7 @@ public class BookingServiceTest {
         Booking booking = new Booking(1L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(1),
                 item, user1, BookingStatus.CANCELED);
         when(bookingStorage.findById(1L)).thenReturn(Optional.of(booking));
-        Assertions.assertThrows(ValidationException.class, ()-> bookingService.approvedBooking(1L, 1L,
+        Assertions.assertThrows(ValidationException.class, () -> bookingService.approvedBooking(1L, 1L,
                 true));
     }
 
@@ -171,7 +171,7 @@ public class BookingServiceTest {
         Booking totalBooking = new Booking(1L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(1),
                 item, user1, BookingStatus.REJECTED);
         when(bookingStorage.findById(1L)).thenReturn(Optional.of(booking));
-        Assertions.assertThrows(ValidationException.class, ()-> bookingService.approvedBooking(3L, 1L,
+        Assertions.assertThrows(ValidationException.class, () -> bookingService.approvedBooking(3L, 1L,
                 true));
     }
 
@@ -191,7 +191,7 @@ public class BookingServiceTest {
     @Test
     void testGetBookingInformationWithNotUser() {
         when(userStorage.findById(1L)).thenReturn(Optional.empty());
-        Assertions.assertThrows(NotFoundException.class, ()-> bookingService.getBookingInformation(1L,
+        Assertions.assertThrows(NotFoundException.class, () -> bookingService.getBookingInformation(1L,
                 1L));
     }
 
@@ -214,7 +214,7 @@ public class BookingServiceTest {
         Booking booking = new Booking(1L, LocalDateTime.now().minusDays(3), LocalDateTime.now().minusDays(1),
                 item, user1, BookingStatus.APPROVED);
         when(bookingStorage.findById(1L)).thenReturn(Optional.of(booking));
-        Assertions.assertThrows(ValidationException.class, ()-> bookingService.getBookingInformation(22L,
+        Assertions.assertThrows(ValidationException.class, () -> bookingService.getBookingInformation(22L,
                 1L));
     }
 
