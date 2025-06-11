@@ -200,7 +200,7 @@ public class BookingServiceTest {
         User user1 = new User(1L, "testUser", "test@mail.ru");
         when(userStorage.findById(1L)).thenReturn(Optional.of(user1));
         when(bookingStorage.findById(1L)).thenReturn(Optional.empty());
-        Assertions.assertThrows(NotFoundException.class, ()-> bookingService.getBookingInformation(1L,
+        Assertions.assertThrows(NotFoundException.class, () -> bookingService.getBookingInformation(1L,
                 1L));
     }
 
