@@ -76,9 +76,9 @@ public class BookingStorageTest {
         LocalDateTime startTime = LocalDateTime.now();
         LocalDateTime endTime = LocalDateTime.now().plusDays(1);
 
-        bookingStorage.save(new Booking(null, startTime, endTime, item, user,
+        Booking booking = bookingStorage.save(new Booking(null, startTime, endTime, item, user,
                 BookingStatus.CANCELED));
-        Booking checkBooking = new Booking(1L, startTime, endTime, item, user, BookingStatus.CANCELED);
+        Booking checkBooking = new Booking(booking.getId(), startTime, endTime, item, user, BookingStatus.CANCELED);
         Assertions.assertEquals(List.of(checkBooking), bookingStorage.findFilterBookerPast(user.getId(),
                 BookingStatus.CANCELED, LocalDateTime.now()));
     }

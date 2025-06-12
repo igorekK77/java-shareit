@@ -2,6 +2,7 @@ package ru.practicum.shareit.request;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.request.dto.ItemRequestDescriptionDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestWithAnswerDto;
@@ -65,6 +67,13 @@ public class ItemRequestControllerTest {
                 .andExpect(jsonPath("$.description").value("test description"))
                 .andExpect(jsonPath("$.userId").value(1));
         verify(requestClient).createRequest(1L, itemRequestDescriptionDto);
+    }
+
+    @Test
+    void testCreateRequestWithEmptyDescription() {
+        ItemRequestDescriptionDto itemRequestDescriptionDto = new ItemRequestDescriptionDto("");
+        Assertions.assertThrows(ValidationException.class, () -> requestController.createRequest(1L,
+                itemRequestDescriptionDto));
     }
 
     @Test

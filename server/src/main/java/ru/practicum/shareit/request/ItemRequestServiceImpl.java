@@ -31,9 +31,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 new NotFoundException("Пользователь с ID = " + userId + " не найден!"));
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setRequester(user);
-        if (itemRequestDescriptionDto.getDescription().isBlank()) {
-            throw new ValidationException("Описание вещи не может быть пустым!");
-        }
         itemRequest.setDescription(itemRequestDescriptionDto.getDescription());
         itemRequest.setCreated(LocalDateTime.now());
 

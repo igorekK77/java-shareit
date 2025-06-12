@@ -62,15 +62,6 @@ public class ItemRequestServiceTest {
     }
 
     @Test
-    void testCreateItemRequestWithEmptyDescription() {
-        ItemRequestDescriptionDto itemRequestDescriptionDto = new ItemRequestDescriptionDto("");
-        User user = new User(1L, "testUser", "test@mail.ru");
-        when(userStorage.findById(1L)).thenReturn(Optional.of(user));
-        Assertions.assertThrows(ValidationException.class, () -> itemRequestService.createItemRequest(1L,
-                itemRequestDescriptionDto));
-    }
-
-    @Test
     void testGetRequestUser() {
         User user1 = new User(1L, "testUser", "test@mail.ru");
         when(userStorage.findById(1L)).thenReturn(Optional.of(user1));

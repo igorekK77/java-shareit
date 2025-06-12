@@ -3,6 +3,7 @@ package ru.practicum.shareit.request;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.request.dto.ItemRequestDescriptionDto;
 
 @RestController
@@ -14,6 +15,9 @@ public class RequestController {
     @PostMapping
     public ResponseEntity<Object> createRequest(@RequestHeader("X-Sharer-User-Id") Long userId,
                                                 @RequestBody ItemRequestDescriptionDto itemRequestDescriptionDto) {
+        if (itemRequestDescriptionDto.getDescription().isBlank()) {
+            throw new ValidationException("Описание вещи не может быть пустым!");
+        }
         return requestClient.createRequest(userId, itemRequestDescriptionDto);
     }
 
